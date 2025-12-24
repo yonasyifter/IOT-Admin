@@ -39,19 +39,20 @@ from(bucket: "{bucket}")
       r._field == "light_intensity" or
       r._field == "tilt" or
       r._field == "ToF" or
+      r._field == "noise" or
       r._field == "forecast_temperature" or
       r._field == "forecast_pressure" or
       r._field == "forecast_humidity"
   )
   {window}
-  |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
-  |> keep(columns: ["_time","device_id","temperature","pressure","humidity","light_intensity","tilt","ToF","forecast_temperature","forecast_pressure","forecast_humidity"])
-  |> sort(columns: ["_time"], desc: false)
+  |> pivot(rowKey:["time_stamp"], columnKey: ["_field"], valueColumn: "_value")
+  |> keep(columns: ["time_stamp","device_id","temperature","pressure","humidity","light_intensity","tilt","ToF","forecast_temperature","forecast_pressure","forecast_humidity"])
+  |> sort(columns: ["time_stamp"], desc: false)
 '''
 
 
 def flux_device_latest(device_id: str):
-    bucket = settings.INFLUXDB_BUCKET
+    bucket = settings.INFLUXDB_BUCKET 
     meas = settings.INFLUX_MEASUREMENT_METRICS
 
     # get latest point per field, then pivot
@@ -67,6 +68,7 @@ data =
         r._field == "humidity" or
         r._field == "light_intensity" or
         r._field == "tilt" or
+        r._field == "noise" or
         r._field == "ToF" or
         r._field == "forecast_temperature" or
         r._field == "forecast_pressure" or
@@ -75,8 +77,8 @@ data =
     |> last()
 
 data
-  |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
-  |> keep(columns: ["_time","device_id","temperature","pressure","humidity","light_intensity","tilt","ToF","forecast_temperature","forecast_pressure","forecast_humidity"])
-  |> sort(columns: ["_time"], desc: true)
+  |> pivot(rowKey:["time_stamp"], columnKey: ["_field"], valueColumn: "_value")
+  |> keep(columns: ["time_stamp","device_id","temperature","pressure","humidity","light_intensity","tilt","ToF","forecast_temperature","forecast_pressure","forecast_humidity"])
+  |> sort(columns: ["time_stamp"], desc: true)
   |> limit(n: 1)
 '''

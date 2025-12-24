@@ -49,6 +49,7 @@ INFLUXDB = {
     "TOKEN": os.getenv("INFLUXDB_TOKEN"),
     "ORG": os.getenv("INFLUXDB_ORG"),
     "BUCKET": os.getenv("INFLUXDB_BUCKET"),
+    "MEASUREMENT_METRICS": os.getenv("INFLUX_MEASUREMENT_METRICS", "metrics"),
 }
 # Application definition
 
