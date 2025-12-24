@@ -12,16 +12,21 @@ class InfluxConfig:
 
 
 def get_influx_config() -> InfluxConfig:
+    # Support either a dict-style `INFLUXDB` setting or legacy individual settings.
+    conf = getattr(settings, "INFLUXDB", {}) or {}
     return InfluxConfig(
-        url=settings.INFLUXDB_URL,
-        token=settings.INFLUXDB_TOKEN,
-        org=settings.INFLUXDB_ORG,
-        bucket=settings.INFLUXDB_BUCKET,
+        url=conf.get("URL") or getattr(settings, "INFLUXDB_URL", None),
+        token=conf.get("TOKEN") or getattr(settings, "INFLUXDB_TOKEN", None),
+        org=conf.get("ORG") or getattr(settings, "INFLUXDB_ORG", None),
+        bucket=conf.get("BUCKET") or getattr(settings, "INFLUXDB_BUCKET", None),
     )
 
 
 def get_influx_client() -> InfluxDBClient:
     cfg = get_influx_config()
+    missing = [k for k, v in (("url", cfg.url), ("token", cfg.token), ("org", cfg.org)) if not v]
+    if missing:
+        raise RuntimeError(f"Missing InfluxDB configuration keys: {', '.join(missing)}")
     return InfluxDBClient(url=cfg.url, token=cfg.token, org=cfg.org)
 
 

@@ -13,7 +13,7 @@ def normalize_row(row: dict) -> dict:
     In pivoted rows, time is in "_time".
     """
     return {
-        "time": row.get("_time"),
+        "time_stamp": row.get("time_stamp"),
         "device_id": row.get("device_id"),
         "temperature": row.get("temperature"),
         "pressure": row.get("pressure"),
@@ -21,6 +21,7 @@ def normalize_row(row: dict) -> dict:
         "light_intensity": row.get("light_intensity"),
         "tilt": row.get("tilt"),
         "ToF": row.get("ToF"),
+        "noise": row.get("noise"),
         "forecast_temperature": row.get("forecast_temperature"),
         "forecast_pressure": row.get("forecast_pressure"),
         "forecast_humidity": row.get("forecast_humidity"),
@@ -32,7 +33,7 @@ class DeviceLatestAPIView(APIView):
     GET /api/devices/{device_id}/latest/
     """
 
-    def get(self, request, device_id: str):
+    def get(self, device_id: str):
         flux = flux_device_latest(device_id=device_id)
         rows = query_flux(flux)
         if not rows:

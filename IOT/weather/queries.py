@@ -1,6 +1,15 @@
 from django.conf import settings
 
 
+def _flux_time_expr(t: str | None) -> str | None:
+  if not t:
+    return None
+  t = t.strip()
+  if t.startswith("-") or t.startswith("now("):
+    return t
+  return f'time(v: "{t}")'
+
+
 def flux_device_range(device_id: str, start: str, stop: str | None, every: str | None):
     """
     start/stop are RFC3339 like:
@@ -9,15 +18,18 @@ def flux_device_range(device_id: str, start: str, stop: str | None, every: str |
       -1h, -7d
     every is optional window: e.g. "1m", "10m", "1h"
     """
-    bucket = settings.INFLUXDB_BUCKET
-    meas = settings.INFLUX_MEASUREMENT_METRICS
+    conf = getattr(settings, "INFLUXDB", {}) or {}
+    bucket = conf.get("BUCKET") or getattr(settings, "INFLUXDB_BUCKET", None)
+    meas = getattr(settings, "INFLUX_MEASUREMENT_METRICS", "metrics")
 
-    stop_line = f', stop: time(v: "{stop}")' if stop else ""
+    start_expr = _flux_time_expr(start) or start
+    stop_expr = _flux_time_expr(stop)
+    stop_line = f', stop: {stop_expr}' if stop_expr else ""
     window = f'|> aggregateWindow(every: {every}, fn: mean, createEmpty: false)\n' if every else ""
 
     return f'''
 from(bucket: "{bucket}")
-  |> range(start: {start}{stop_line})
+  |> range(start: {start_expr}{stop_line})
   |> filter(fn: (r) => r._measurement == "{meas}")
   |> filter(fn: (r) => r.device_id == "{device_id}")
   |> filter(fn: (r) =>

@@ -11,6 +11,11 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -30,12 +35,21 @@ ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [
         "rest_framework.renderers.JSONRenderer",
+        "rest_framework.renderers.BrowsableAPIRenderer", # Add this for dev ease
     ],
     "DEFAULT_PARSER_CLASSES": [
         "rest_framework.parsers.JSONParser",
+        "rest_framework.parsers.FormParser",       # Allows standard form data
+        "rest_framework.parsers.MultiPartParser",  # Required for File/Image uploads
     ],
 }
-
+# InfluxDB configuration
+INFLUXDB = {
+    "URL": os.getenv("INFLUXDB_URL"),
+    "TOKEN": os.getenv("INFLUXDB_TOKEN"),
+    "ORG": os.getenv("INFLUXDB_ORG"),
+    "BUCKET": os.getenv("INFLUXDB_BUCKET"),
+}
 # Application definition
 
 INSTALLED_APPS = [

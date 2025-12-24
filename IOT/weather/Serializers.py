@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 class DeviceReadingSerializer(serializers.Serializer):
     # timestamp
-    time = serializers.DateTimeField(required=True)
+    time_stamp = serializers.FloatField(required=True)
 
     # device identity
     device_id = serializers.CharField(required=True)
@@ -14,6 +14,7 @@ class DeviceReadingSerializer(serializers.Serializer):
     humidity = serializers.FloatField(required=False, allow_null=True)
     light_intensity = serializers.FloatField(required=False, allow_null=True)
     tilt = serializers.FloatField(required=False, allow_null=True)
+    noise = serializers.FloatField(required=False, allow_null=True)
     ToF = serializers.FloatField(required=False, allow_null=True)
 
     # optional forecast fields (only if you store them)
