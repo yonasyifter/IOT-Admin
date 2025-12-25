@@ -49,12 +49,13 @@ INFLUXDB = {
     "TOKEN": os.getenv("INFLUXDB_TOKEN"),
     "ORG": os.getenv("INFLUXDB_ORG"),
     "BUCKET": os.getenv("INFLUXDB_BUCKET"),
-    "MEASUREMENT_METRICS": os.getenv("INFLUX_MEASUREMENT_METRICS", "metrics"),
+   # "MEASUREMENT_METRICS": os.getenv("INFLUX_MEASUREMENT_METRICS", "metrics"),
 }
 # Application definition
 
 INSTALLED_APPS = [
     "weather",
+    "influxdb_metrics",
     "rest_framework",
     "django.contrib.admin",
     "django.contrib.auth",

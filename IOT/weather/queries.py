@@ -10,7 +10,7 @@ def _flux_time_expr(t: str | None) -> str | None:
   return f'time(v: "{t}")'
 
 
-def flux_device_range(device_id: str, start: str, stop: str | None, every: str | None):
+def flux_device_range(device_id: str | None, start: str, stop: str | None, every: str | None):
     """
     start/stop are RFC3339 like:
       2025-12-23T00:00:00Z
@@ -45,9 +45,9 @@ from(bucket: "{bucket}")
       r._field == "forecast_humidity"
   )
   {window}
-  |> pivot(rowKey:["time_stamp"], columnKey: ["_field"], valueColumn: "_value")
-  |> keep(columns: ["time_stamp","device_id","temperature","pressure","humidity","light_intensity","tilt","ToF","forecast_temperature","forecast_pressure","forecast_humidity"])
-  |> sort(columns: ["time_stamp"], desc: false)
+  |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
+  |> keep(columns: ["_time","device_id","temperature","pressure","humidity","light_intensity","tilt","ToF","forecast_temperature","forecast_pressure","forecast_humidity"])
+  |> sort(columns: ["_time"], desc: false)
 '''
 
 
@@ -78,7 +78,8 @@ data =
 
 data
   |> pivot(rowKey:["time_stamp"], columnKey: ["_field"], valueColumn: "_value")
-  |> keep(columns: ["time_stamp","device_id","temperature","pressure","humidity","light_intensity","tilt","ToF","forecast_temperature","forecast_pressure","forecast_humidity"])
-  |> sort(columns: ["time_stamp"], desc: true)
+  |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
+  |> keep(columns: ["_time","device_id","temperature","pressure","humidity","light_intensity","tilt","ToF","forecast_temperature","forecast_pressure","forecast_humidity"])
+  |> sort(columns: ["_time"], desc: true)
   |> limit(n: 1)
 '''

@@ -5,6 +5,7 @@ from rest_framework import status
 from .Serializers import DeviceReadingSerializer
 from .Influx import query_flux
 from .queries import flux_device_range, flux_device_latest
+from datetime import datetime, timezone
 
 
 def normalize_row(row: dict) -> dict:
@@ -12,8 +13,26 @@ def normalize_row(row: dict) -> dict:
     Convert Influx row dict into API-friendly shape.
     In pivoted rows, time is in "_time".
     """
+    def _to_timestamp(v):
+        if v is None:
+            return None
+        if isinstance(v, (int, float)):
+            return float(v)
+        if isinstance(v, datetime):
+            # return seconds since epoch
+            return float(v.replace(tzinfo=timezone.utc).timestamp())
+        if isinstance(v, str):
+            try:
+                # handle RFC3339 like 2025-12-23T00:00:00Z
+                v2 = v.replace("Z", "+00:00")
+                return float(datetime.fromisoformat(v2).replace(tzinfo=timezone.utc).timestamp())
+            except Exception:
+                return None
+        return None
+
+    ts = row.get("time_stamp") or row.get("_time")
     return {
-        "time_stamp": row.get("time_stamp"),
+        "time_stamp": _to_timestamp(ts),
         "device_id": row.get("device_id"),
         "temperature": row.get("temperature"),
         "pressure": row.get("pressure"),
@@ -41,6 +60,7 @@ class DeviceLatestAPIView(APIView):
 
         payload = normalize_row(rows[0])
         ser = DeviceReadingSerializer(data=payload)
+        #print(ser)
         ser.is_valid(raise_exception=True)
         return Response(ser.data)
 
@@ -65,5 +85,6 @@ class DeviceRangeAPIView(APIView):
 
         payload = [normalize_row(r) for r in rows]
         ser = DeviceReadingSerializer(data=payload, many=True)
+        #print(ser)
         ser.is_valid(raise_exception=True)
         return Response(ser.data)
